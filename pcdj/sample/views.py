@@ -67,3 +67,21 @@ def search(request):
         return Response(serializer.data)
     else:
         return Response({"samples": []})
+    
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def predict(request):
+    sample_id = request.data.get('sample_id', '')
+    try:
+        sample = Sample.objects.filter(owner=request.user).get(id=sample_id)
+        # logic to get label from sample.image
+        label = 'cat'
+        sample.predicted_label = label
+        sample.save(update_fields=['predicted_label'])
+        serializer = SampleSerializer(sample)
+        return Response(serializer.data)
+    except Sample.DoesNotExist:
+        raise Http404
+    
+    
