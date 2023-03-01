@@ -35,22 +35,22 @@ class Patient(models.Model):
 
 
 class Sample(models.Model):
-    BIOPSY = 'B'
-    SURGICAL_RESECTION = 'SR'
-    OTHER = 'O'
+    BIOPSY = 'biopsy'
+    SURGICAL_RESECTION = 'surgical resection'
+    OTHER = 'other'
 
     TYPE_CHOICES = (
         (BIOPSY, 'biopsy'),
         (SURGICAL_RESECTION, 'surgical resection'),
-        (OTHER, 'Other')
+        (OTHER, 'other')
     )
 
-    BLOOD = 'B'
-    TISSUE = 'T'
-    URINE = 'U'
-    STOOL = 'S'
-    FLUID = 'F'
-    OTHER = 'O'
+    BLOOD = 'Blood'
+    TISSUE = 'Tissue'
+    URINE = 'Urine'
+    STOOL = 'Stool'
+    FLUID = 'Fluid'
+    OTHER = 'Other'
 
     ORIGIN_CHOICES = (
         (BLOOD, 'blood'),
@@ -58,7 +58,7 @@ class Sample(models.Model):
         (URINE, 'urine'),
         (STOOL, 'stool'),
         (FLUID, 'fluid'),
-        (OTHER, 'Other')
+        (OTHER, 'other')
     )
 
     owner = models.ForeignKey('auth.User', related_name='owner',on_delete=models.CASCADE)
@@ -84,6 +84,16 @@ class Sample(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='uploads/', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    predicted_label = models.CharField(
+        max_length=50,
+        default='pending',
+        blank=True, null=True, verbose_name='Predicted Label'
+    )
+    human_label = models.CharField(
+        max_length=50,
+        default='pending',
+        blank=True, null=True, verbose_name='Human label'
+    )
 
     class Meta:
         ordering = ('-date_added',)

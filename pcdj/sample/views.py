@@ -5,7 +5,7 @@ from django.shortcuts import render
 from rest_framework import status, authentication, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from .models import Patient, Sample
 from .serializers import PatientSerializer, SampleSerializer
@@ -48,14 +48,20 @@ class PatientDetail(APIView):
 
 
 @api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
 def search(request):
     query = request.data.get('query', '')
 
     if query:
-        samples = Sample.objects.filter(
+        samples = Sample.objects.filter(owner=request.user).filter(
             Q(patient__name__icontains=query) |
-            Q(origin__icontains=query) |
-            Q(type__icontains=query)
+            Q(origin__contains=query) |
+            Q(type__icontains=query) |
+            Q(predicted_label__icontains=query) |
+            Q(human_label__icontains=query) |
+            Q(comments__icontains=query) |
+            Q(symptoms__icontains=query) 
         )
         serializer = SampleSerializer(samples, many=True)
         return Response(serializer.data)
