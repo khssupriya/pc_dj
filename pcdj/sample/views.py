@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 
 from .models import Patient, Sample
 from .serializers import PatientSerializer, SampleSerializer
+from .utils import model_predict
 
 class SamplesList(APIView):
     authentication_classes = [authentication.TokenAuthentication]
@@ -67,7 +68,7 @@ def search(request):
         return Response(serializer.data)
     else:
         return Response({"samples": []})
-    
+
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
@@ -75,9 +76,8 @@ def predict(request):
     sample_id = request.data.get('sample_id', '')
     try:
         sample = Sample.objects.filter(owner=request.user).get(id=sample_id)
-        # logic to get label from sample.image
-        label = 'cat'
-        sample.predicted_label = label
+        prediction = model_predict(sample.image)
+        sample.predicted_label = prediction
         sample.save(update_fields=['predicted_label'])
         serializer = SampleSerializer(sample)
         return Response(serializer.data)
