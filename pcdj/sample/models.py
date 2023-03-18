@@ -105,6 +105,7 @@ class Sample(models.Model):
     #     return f"{self.patient.get_full_name()}-{self.pathologist.get_full_name()}-{self.id}"
 
     def get_image(self):
+        print("yooo", self.image)
         if self.image:
             return 'http://localhost:8000' + self.image.url
         return ''

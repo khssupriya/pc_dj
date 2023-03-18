@@ -5,6 +5,7 @@ from django.shortcuts import render
 from rest_framework import status, authentication, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FileUploadParser
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from .models import Patient, Sample
@@ -12,6 +13,7 @@ from .serializers import PatientSerializer, SampleSerializer
 from .utils import model_predict
 
 class SamplesList(APIView):
+    parser_classes = [MultiPartParser, FileUploadParser]
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
@@ -19,6 +21,17 @@ class SamplesList(APIView):
         samples = Sample.objects.filter(owner=self.request.user).all()
         serializer = SampleSerializer(samples, many=True)
         return Response(serializer.data)
+    
+    def post(self, request, format=None):
+        serializer = SampleSerializer(data=request.data, context={'request': request})
+        print(request.data)
+        if serializer.is_valid():
+            sample = serializer.save(owner=request.user)
+            if 'image' in request.data:
+                sample.image = request.data['image']
+                sample.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class SampleDetail(APIView):
     authentication_classes = [authentication.TokenAuthentication]
