@@ -23,8 +23,9 @@ class SamplesList(APIView):
         return Response(serializer.data)
     
     def post(self, request, format=None):
-        serializer = SampleSerializer(data=request.data, context={'request': request})
         print(request.data)
+        serializer = SampleSerializer(data=request.data, context={'request': request})
+        print(serializer, "sseeeee")
         if serializer.is_valid():
             sample = serializer.save(owner=request.user)
             if 'image' in request.data:
@@ -85,16 +86,27 @@ def search(request):
 @api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
-def predict(request):
-    sample_id = request.data.get('sample_id', '')
+def predict_sample(request):
     try:
-        sample = Sample.objects.filter(owner=request.user).get(id=sample_id)
-        prediction = model_predict(sample.image)
-        sample.predicted_label = prediction
-        sample.save(update_fields=['predicted_label'])
-        serializer = SampleSerializer(sample)
-        return Response(serializer.data)
-    except Sample.DoesNotExist:
-        raise Http404
+        sample_id = request.data.get('sample_id', '')
+        try:
+            sample = Sample.objects.filter(owner=request.user).get(id=sample_id)
+            prediction = model_predict(sample.image)
+            sample.predicted_label = prediction
+            sample.save(update_fields=['predicted_label'])
+            serializer = SampleSerializer(sample)
+            return Response(serializer.data)
+        except Sample.DoesNotExist:
+            raise Http404
+    except AttributeError:
+        return Response("sample_id is missing in request", status=status.HTTP_400_BAD_REQUEST)
     
-    
+
+@api_view(['POST'])
+def predict_image(request):
+    try:
+        image = request.data.get('image', '')
+        prediction = model_predict(image)
+        return Response({"predictedLabel": prediction})
+    except AttributeError:
+        return Response("image is missing in request", status=status.HTTP_400_BAD_REQUEST)
