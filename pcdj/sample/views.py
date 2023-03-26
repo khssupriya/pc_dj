@@ -67,7 +67,6 @@ class PatientDetail(APIView):
 @permission_classes([permissions.IsAuthenticated])
 def search(request):
     query = request.data.get('query', '')
-
     if query:
         samples = Sample.objects.filter(owner=request.user).filter(
             Q(patient__name__icontains=query) |
@@ -110,3 +109,19 @@ def predict_image(request):
         return Response({"predictedLabel": prediction})
     except AttributeError:
         return Response("image is missing in request", status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def add_annotations(request):
+    sample_id = request.data.get('sample_id', '')
+    annotations = request.data.get('annotations', '')
+    try:
+        sample = Sample.objects.filter(owner=request.user).get(id=sample_id)
+        sample.annotations = annotations
+        sample.save(update_fields=['annotations'])
+        serializer = SampleSerializer(sample)
+        return Response(serializer.data)
+    except Sample.DoesNotExist:
+        raise Http404

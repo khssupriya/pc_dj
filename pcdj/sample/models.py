@@ -92,8 +92,9 @@ class Sample(models.Model):
     human_label = models.CharField(
         max_length=50,
         default='pending',
-        blank=True, null=True, verbose_name='Human label'
+        blank=True, null=True, verbose_name='Human Label'
     )
+    annotations = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ('-date_added',)

@@ -19,6 +19,7 @@ class SampleSerializer(serializers.ModelSerializer):
             "get_thumbnail",
             "predicted_label",
             "human_label",
+            "annotations"
         )
 
 class PatientSerializer(serializers.ModelSerializer):
