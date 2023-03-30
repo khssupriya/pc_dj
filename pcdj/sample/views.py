@@ -1,3 +1,4 @@
+import json
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import render
@@ -25,13 +26,41 @@ class SamplesList(APIView):
     def post(self, request, format=None):
         print(request.data)
         serializer = SampleSerializer(data=request.data, context={'request': request})
-        print(serializer, "sseeeee")
+        # print(serializer.is_valid(), serializer.data, "sseeeee")
         if serializer.is_valid():
             sample = serializer.save(owner=request.user)
             if 'image' in request.data:
                 sample.image = request.data['image']
                 sample.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class PatientsList(APIView):
+    parser_classes = [MultiPartParser, FileUploadParser]
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        samples = Patient.objects.all()
+        serializer = PatientSerializer(samples, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, format=None):
+        name = request.POST.get('name')
+        sex = request.POST.get('sex')
+        dob = request.POST.get('dob')
+        phone_number = request.POST.get('phone_number')
+        data = {
+            'name': name,
+            'sex': sex,
+            'dob': dob,
+            'phone_number': phone_number,
+        }
+        serializer = PatientSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            patient = serializer.save()
+            return Response(patient.id, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class SampleDetail(APIView):

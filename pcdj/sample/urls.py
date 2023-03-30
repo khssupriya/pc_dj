@@ -4,6 +4,7 @@ from sample import views
 
 urlpatterns = [
     path('samples/', views.SamplesList.as_view()),
+    path('patients/', views.PatientsList.as_view()),
     path('samples/search', views.search),
     path('samples/predict', views.predict_sample),
     path('samples/annotations', views.add_annotations),

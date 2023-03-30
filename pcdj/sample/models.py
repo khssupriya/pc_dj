@@ -61,7 +61,7 @@ class Sample(models.Model):
         (OTHER, 'other')
     )
 
-    owner = models.ForeignKey('auth.User', related_name='owner',on_delete=models.CASCADE)
+    owner = models.ForeignKey('auth.User', related_name='owner',on_delete=models.CASCADE, blank=True, null=True)
     patient = models.ForeignKey(
         Patient,
         related_name='patient',
