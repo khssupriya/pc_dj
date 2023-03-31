@@ -10,6 +10,7 @@ class SampleSerializer(serializers.ModelSerializer):
             "owner",
             "patient",
             "date_collected",
+            "date_added",
             "diagnosis_code",
             "type",
             "origin",

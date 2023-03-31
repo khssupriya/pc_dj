@@ -138,6 +138,7 @@ def predict_sample(request):
     try:
         sample_id = request.data.get('sample_id', '')
         try:
+            print(Sample.objects.filter(owner=request.user))
             sample = Sample.objects.filter(owner=request.user).get(id=sample_id)
             prediction = model_predict(sample.image)
             sample.predicted_label = prediction
