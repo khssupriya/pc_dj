@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Patient, Sample
+from .models import Patient, Sample, SharedComment
 
 class SampleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,5 +31,18 @@ class PatientSerializer(serializers.ModelSerializer):
             "sex",
             "dob",
             "phone_number",
+        )
+
+class SharedCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SharedComment
+        fields = (
+            "id",
+            "status",
+            "sample",
+            "sender",
+            "receiver",
+            "sender_comment",
+            "receiver_comment",
         )
         

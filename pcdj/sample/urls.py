@@ -3,6 +3,11 @@ from django.urls import path, include
 from sample import views
 
 urlpatterns = [
+    path('sharedcomments/', views.SharedCommentsList.as_view()),
+    path('sharedcomments/updatecomment', views.add_receiver_comment),
+    path('sharedcomments/getsamplecomments', views.get_sample_shared_comments),
+
+
     path('samples/', views.SamplesList.as_view()),
     path('patients/', views.PatientsList.as_view()),
     path('samples/search', views.search),

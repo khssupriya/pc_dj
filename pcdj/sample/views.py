@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FileUploadParser
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
-from .models import Patient, Sample
-from .serializers import PatientSerializer, SampleSerializer
+from .models import Patient, Sample, SharedComment
+from .serializers import PatientSerializer, SampleSerializer, SharedCommentSerializer
 from .utils import model_predict
 
 class SamplesList(APIView):
@@ -63,13 +63,33 @@ class PatientsList(APIView):
             return Response(patient.id, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class SharedCommentsList(APIView):
+    # parser_classes = [MultiPartParser, FileUploadParser]
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        # reeciver makes the call here to get all sharedComments shared with them
+        sharedComments = SharedComment.objects.filter(receiver=self.request.user).all()
+        serializer = SharedCommentSerializer(sharedComments, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, format=None):
+        # sender makes the call to create a new SharedComment
+        serializer = SharedCommentSerializer(data=request.data, context={'request': request})
+        # print(serializer.is_valid(), serializer.data, "sseeeee")
+        if serializer.is_valid():
+            serializer.save(sender=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class SampleDetail(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, sample_id):
         try:
-            return Sample.objects.filter(owner=self.request.user).get(id=sample_id)
+            return Sample.objects.get(id=sample_id)
         except Sample.DoesNotExist:
             raise Http404
         
@@ -153,4 +173,34 @@ def add_annotations(request):
         serializer = SampleSerializer(sample)
         return Response(serializer.data)
     except Sample.DoesNotExist:
+        raise Http404
+    
+
+@api_view(['POST'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def add_receiver_comment(request):
+    shared_comment_id = request.data.get('shared_comment_id', '')
+    receiver_comment = request.data.get('receiver_comment', '')
+    try:
+        print(request.user, SharedComment.objects.filter(receiver=request.user))
+        shared_comment = SharedComment.objects.filter(receiver=request.user).get(id=shared_comment_id)
+        shared_comment.receiver_comment = receiver_comment
+        shared_comment.save(update_fields=['receiver_comment'])
+        serializer = SharedCommentSerializer(shared_comment)
+        return Response(serializer.data)
+    except SharedComment.DoesNotExist:
+        raise Http404
+    
+
+@api_view(['GET'])
+@authentication_classes([authentication.TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def get_sample_shared_comments(request):
+    sample_id = request.data.get('sample_id', '')
+    try:
+        shared_comments = SharedComment.objects.filter(sample=sample_id)
+        serializer = SharedCommentSerializer(shared_comments, many=True)
+        return Response(serializer.data)
+    except SharedComment.DoesNotExist:
         raise Http404

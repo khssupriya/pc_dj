@@ -133,3 +133,20 @@ class Sample(models.Model):
         thumbnail = File(thumb_io, name=image.name)
 
         return thumbnail
+
+class SharedComment(models.Model):
+    COMPLETE = 'complete'
+    INCOMPLETE = 'incomplete'
+    STATUS_CHOICES = (
+        (COMPLETE, 'complete'),
+        (INCOMPLETE, 'incomplete'),
+    )
+    status = models.CharField(
+        max_length=50,
+        blank=True, null=True, verbose_name='Status', choices=STATUS_CHOICES,
+    )
+    sample = models.ForeignKey('sample.Sample', related_name='sharedComment',on_delete=models.CASCADE, blank=True, null=True)
+    sender = models.ForeignKey('auth.User', related_name='sharedCommentSender',on_delete=models.CASCADE, blank=True, null=True)
+    receiver = models.ForeignKey('auth.User', related_name='sharedCommentReceiver',on_delete=models.CASCADE, blank=True, null=True)
+    sender_comment = models.TextField(blank=True, null=True)
+    receiver_comment = models.TextField(blank=True, null=True)
