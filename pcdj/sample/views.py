@@ -13,6 +13,8 @@ from .models import Patient, Sample, SharedComment
 from .serializers import PatientSerializer, SampleSerializer, SharedCommentSerializer
 from .utils import model_predict
 
+# from django.contrib.auth import User
+
 class SamplesList(APIView):
     parser_classes = [MultiPartParser, FileUploadParser]
     authentication_classes = [authentication.TokenAuthentication]
@@ -187,21 +189,41 @@ def add_receiver_comment(request):
         print(request.user, SharedComment.objects.filter(receiver=request.user))
         shared_comment = SharedComment.objects.filter(receiver=request.user).get(id=shared_comment_id)
         shared_comment.receiver_comment = receiver_comment
-        shared_comment.save(update_fields=['receiver_comment'])
+        shared_comment.status = 'complete'
+        shared_comment.save(update_fields=['receiver_comment', 'status'])
         serializer = SharedCommentSerializer(shared_comment)
         return Response(serializer.data)
     except SharedComment.DoesNotExist:
         raise Http404
     
 
-@api_view(['GET'])
+@api_view(['POST'])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def get_sample_shared_comments(request):
     sample_id = request.data.get('sample_id', '')
     try:
         shared_comments = SharedComment.objects.filter(sample=sample_id)
-        serializer = SharedCommentSerializer(shared_comments, many=True)
-        return Response(serializer.data)
+        print(shared_comments)
+        if(shared_comments):
+            serializer = SharedCommentSerializer(shared_comments, many=True)
+            return Response(serializer.data)
+        return Response({"message": "empty"})
     except SharedComment.DoesNotExist:
         raise Http404
+    
+
+# @api_view(['POST'])
+# @authentication_classes([authentication.TokenAuthentication])
+# @permission_classes([permissions.IsAuthenticated])
+# def get_username(request):
+#     user_id = request.data.get('user_id', '')
+#     try:
+#         user = User.objects.filter(sample=sample_id)
+#         print(user)
+#         return Response({"user": "username"})
+#     except SharedComment.DoesNotExist:
+#         raise Http404
+
+# create Profile object
+        
