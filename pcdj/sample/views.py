@@ -26,7 +26,6 @@ class SamplesList(APIView):
         return Response(serializer.data)
     
     def post(self, request, format=None):
-        print(request.data)
         serializer = SampleSerializer(data=request.data, context={'request': request})
         # print(serializer.is_valid(), serializer.data, "sseeeee")
         if serializer.is_valid():
@@ -77,6 +76,8 @@ class SharedCommentsList(APIView):
         return Response(serializer.data)
     
     def post(self, request, format=None):
+        if(SharedComment.objects.filter(receiver=request.data["receiver"], sample=request.data["sample"]).exists()):
+            return Response("Already shared", status=status.HTTP_400_BAD_REQUEST)
         # sender makes the call to create a new SharedComment
         serializer = SharedCommentSerializer(data=request.data, context={'request': request})
         # print(serializer.is_valid(), serializer.data, "sseeeee")
@@ -186,7 +187,6 @@ def add_receiver_comment(request):
     shared_comment_id = request.data.get('shared_comment_id', '')
     receiver_comment = request.data.get('receiver_comment', '')
     try:
-        print(request.user, SharedComment.objects.filter(receiver=request.user))
         shared_comment = SharedComment.objects.get(id=shared_comment_id)
         shared_comment.receiver_comment = receiver_comment
         shared_comment.status = 'complete'
