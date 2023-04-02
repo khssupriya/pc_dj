@@ -140,8 +140,8 @@ def predict_sample(request):
     try:
         sample_id = request.data.get('sample_id', '')
         try:
-            print(Sample.objects.filter(owner=request.user))
-            sample = Sample.objects.filter(owner=request.user).get(id=sample_id)
+            print(Sample.objects.filter(owner=request.user), sample_id)
+            sample = Sample.objects.get(id=sample_id)
             prediction = model_predict(sample.image)
             sample.predicted_label = prediction
             sample.save(update_fields=['predicted_label'])
@@ -187,7 +187,7 @@ def add_receiver_comment(request):
     receiver_comment = request.data.get('receiver_comment', '')
     try:
         print(request.user, SharedComment.objects.filter(receiver=request.user))
-        shared_comment = SharedComment.objects.filter(receiver=request.user).get(id=shared_comment_id)
+        shared_comment = SharedComment.objects.get(id=shared_comment_id)
         shared_comment.receiver_comment = receiver_comment
         shared_comment.status = 'complete'
         shared_comment.save(update_fields=['receiver_comment', 'status'])
