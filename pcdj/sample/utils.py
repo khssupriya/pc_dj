@@ -3,9 +3,9 @@ from keras.models import load_model
 import efficientnet.keras as efn
 from PIL import Image
 
-LABELS = ['colon adenocarcinoma', 'colon normal', 'gastric adenocarcinoma', 'gastric normal','kidney Chromophobe carcinoma', 'kidney clear cell carinoma', 'kidney papillary carcinoma']
+LABELS = ['colon adenocarcinoma', 'colon normal', 'gastric adenocarcinoma', 'gastric normal', 'kidney clear cell carinoma', 'kidney normal']
 
-filePath = "ml/final_model.h5"
+filePath = "ml/play_model_kidney2.h5"
 model = load_model(filePath)
 
 def model_predict(image):
