@@ -15,8 +15,9 @@ Before running the Django server, you will need the following:
 
 ## Getting Started
 - Create a virtual environment and activate it using your preferred method.
-- Install the required Python packages by running `pip install -r requirements.txt.`
-- Place your trained model in the ml directory.
+- Install the required Python packages by running `pip install -r requirements.txt.` 
+- `cd pcdj`
+- Place your trained model in the `ml` directory.
 - Modify the settings.py file to set the correct database settings and any other necessary configurations.
 - Run `python manage.py migrate` to create the necessary database tables.
 - Run `python manage.py runserver` to start the server.
